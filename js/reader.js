@@ -3,6 +3,8 @@
 'use strict';
 
 const PAGE_SIZE = 24;            // 12 lục-bát pairs per page
+// Small line icon for the read-aloud buttons (a fixed string, never page text).
+const ICON_SPEAKER = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
 const LS_PAGE = 'kieu_last_page';
 const LS_MARKS = 'kieu_bookmarks';
 // The light/dark theme is handled by js/site.js (shared with the Chinh Phụ Ngâm reader).
@@ -27,32 +29,32 @@ function verseJump(target, label) {
   return `<a class="verse-jump" data-target-line="${target}" href="#cau-${target}">${escapeHtml(label)}</a>`;
 }
 
-const CONNECTION_LABELS = { echo: 'VỌNG LẠI', foreshadow: 'BÁO TRƯỚC', callback: 'GỢI LẠI' };
+const CONNECTION_LABELS = { echo: 'Vọng lại', foreshadow: 'Báo trước', callback: 'Gợi lại' };
 
 function readerInsightPieces(line) {
   const pieces = [];
   const insight = window.readerInsightForLine ? window.readerInsightForLine(line.n) : null;
   if (insight) {
-    const rows = [['Ý CẶP CÂU', insight.pair], ['NÓI NÔM NA', insight.plain], ['HOÀN CẢNH', insight.context],
-      ['CHỮ NGHĨA', insight.grammar], ['ĐIỂN CỐ', insight.allusion], ['ẨN Ý', insight.subtext]];
-    const words = (insight.words || []).length ? `<div class="insight-field"><b>TỪ NGỮ</b><dl class="insight-words">${insight.words.map(w =>
+    const rows = [['Ý cặp câu', insight.pair], ['Nói nôm na', insight.plain], ['Hoàn cảnh', insight.context],
+      ['Chữ nghĩa', insight.grammar], ['Điển cố', insight.allusion], ['Ẩn ý', insight.subtext]];
+    const words = (insight.words || []).length ? `<div class="insight-field"><b>Từ ngữ</b><dl class="insight-words">${insight.words.map(w =>
       `<dt>${escapeHtml(w.term)}${w.han ? ` <span class="han" lang="zh-Hant">${escapeHtml(w.han)}</span>` : ''}</dt><dd>${escapeHtml(w.meaning)}</dd>`).join('')}</dl></div>` : '';
     pieces.push(`<div class="reader-insight-row insight-layer">${rows.filter(r => r[1]).map(([k, v]) =>
       `<div class="insight-field"><b>${k}</b><p>${escapeHtml(v)}</p></div>`).join('')}${words}</div>`);
   }
   const layer = window.narrativeLayersForLine ? window.narrativeLayersForLine(line.n) : null;
   if (layer) {
-    if (layer.voice) pieces.push(`<div class="reader-insight-row narrative-layer"><div class="insight-label-line"><b>GIỌNG KỂ</b><span class="voice-chip">${escapeHtml(layer.voice.kind)}</span></div><p>${escapeHtml(layer.voice.text)}</p></div>`);
-    if (layer.knowledge) pieces.push(`<div class="reader-insight-row narrative-layer knowledge-layer"><b>NGƯỜI ĐỌC BIẾT GÌ</b><p>${escapeHtml(layer.knowledge)}</p></div>`);
-    if (layer.psychology) pieces.push(`<div class="reader-insight-row narrative-layer psychology-layer"><b>TÂM LÝ KIỀU</b><strong>${escapeHtml(layer.psychology.stage)}</strong><p>${escapeHtml(layer.psychology.text)}</p></div>`);
+    if (layer.voice) pieces.push(`<div class="reader-insight-row narrative-layer"><div class="insight-label-line"><b>Giọng kể</b><span class="voice-chip">${escapeHtml(layer.voice.kind)}</span></div><p>${escapeHtml(layer.voice.text)}</p></div>`);
+    if (layer.knowledge) pieces.push(`<div class="reader-insight-row narrative-layer knowledge-layer"><b>Người đọc biết gì</b><p>${escapeHtml(layer.knowledge)}</p></div>`);
+    if (layer.psychology) pieces.push(`<div class="reader-insight-row narrative-layer psychology-layer"><b>Tâm lý Kiều</b><strong>${escapeHtml(layer.psychology.stage)}</strong><p>${escapeHtml(layer.psychology.text)}</p></div>`);
     if (layer.connections && layer.connections.length) {
-      pieces.push(`<div class="reader-insight-row narrative-layer"><b>LIÊN KẾT TRONG TRUYỆN</b><div class="insight-connections">${layer.connections.map(c =>
-        `<div class="insight-connection"><div><span>${CONNECTION_LABELS[c.type] || 'LIÊN KẾT'}</span>${verseJump(c.target, `${c.label} · câu ${c.target}`)}</div><p>${escapeHtml(c.text)}</p></div>`).join('')}</div></div>`);
+      pieces.push(`<div class="reader-insight-row narrative-layer"><b>Liên kết trong truyện</b><div class="insight-connections">${layer.connections.map(c =>
+        `<div class="insight-connection"><div><span>${CONNECTION_LABELS[c.type] || 'Liên kết'}</span>${verseJump(c.target, `${c.label} · câu ${c.target}`)}</div><p>${escapeHtml(c.text)}</p></div>`).join('')}</div></div>`);
     }
     if (layer.variant) {
       const v = layer.variant;
       const src = v.source && v.source.url ? `<a class="variant-source" href="${escapeHtml(v.source.url)}" target="_blank" rel="noopener">${escapeHtml(v.source.label || 'Nguồn')} ↗</a>` : '';
-      pieces.push(`<div class="reader-insight-row narrative-layer variant-layer"><div class="insight-label-line"><b>DỊ BẢN</b>${src}</div><div class="variant-compare"><div><span>BẢN ĐANG ĐỌC</span><p>${escapeHtml(v.base)}</p></div><div><span>BẢN KHÁC</span><p>${escapeHtml(v.alternate)}</p></div></div><p class="variant-effect">${escapeHtml(v.effect)}</p>${v.note ? `<small>${escapeHtml(v.note)}</small>` : ''}</div>`);
+      pieces.push(`<div class="reader-insight-row narrative-layer variant-layer"><div class="insight-label-line"><b>Dị bản</b>${src}</div><div class="variant-compare"><div><span>Bản đang đọc</span><p>${escapeHtml(v.base)}</p></div><div><span>Bản khác</span><p>${escapeHtml(v.alternate)}</p></div></div><p class="variant-effect">${escapeHtml(v.effect)}</p>${v.note ? `<small>${escapeHtml(v.note)}</small>` : ''}</div>`);
     }
   }
   return pieces;
@@ -66,7 +68,7 @@ function renderPsychology(firstLine) {
   if (!ctx || !ctx.current) { box.hidden = true; return; }
   const c = ctx.current;
   box.hidden = false;
-  box.innerHTML = `<div class="insight-label-line"><b>DIỄN BIẾN TÂM LÝ</b><span class="psychology-count">${ctx.index + 1}/${ctx.total}</span></div>
+  box.innerHTML = `<div class="insight-label-line"><b>Diễn biến tâm lý</b><span class="psychology-count">${ctx.index + 1}/${ctx.total}</span></div>
     <strong>${escapeHtml(c.stage)}</strong><p>${escapeHtml(c.text)}</p>
     <div class="psychology-context"><span>Câu ${c.range[0]}–${c.range[1]}</span><div>
       ${ctx.previous ? verseJump(ctx.previous.range[0], '← ' + ctx.previous.stage) : '<span></span>'}
@@ -113,7 +115,7 @@ function renderPage(opts) {
     say.className = 'say';
     say.title = 'Nghe đọc cặp câu này';
     say.setAttribute('aria-label', 'Nghe đọc cặp câu này');
-    say.textContent = '🔊';
+    say.innerHTML = ICON_SPEAKER;
     say.dataset.say = from + i + 1;
     pair.appendChild(say);
     verses.appendChild(pair);
@@ -207,7 +209,7 @@ function speak(lines, onDone) {
     note.textContent = 'Máy của bạn chưa có giọng đọc tiếng Việt, nên giọng đọc có thể không chuẩn. Có thể cài thêm giọng tiếng Việt trong cài đặt ngôn ngữ của máy.';
   }
   state.speaking = true;
-  $('readPage').textContent = '⏹ Dừng đọc';
+  $('readPage').textContent = 'Dừng đọc';
   lines.forEach((text, i) => {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'vi-VN';
@@ -221,7 +223,7 @@ function speak(lines, onDone) {
 function stopSpeaking() {
   if (window.speechSynthesis) speechSynthesis.cancel();
   state.speaking = false;
-  $('readPage').textContent = '🔊 Đọc trang này';
+  $('readPage').textContent = 'Đọc to trang này';
 }
 
 /* ---------- Wiring ---------- */

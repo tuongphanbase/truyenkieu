@@ -13,7 +13,7 @@ for(const k of ['technique','motif','culture','living','sourceCompare'])assert.o
 assert.strictEqual(renders,1,'addon should rerender reader once after decorating');
 const rows=sandbox.readerInsightPieces({n:647});
 assert.ok(rows[0]==='base','must preserve existing reader insight rows');
-assert.ok(rows.join('').includes('BÚT PHÁP'));
-assert.ok(rows.join('').includes('BỐI CẢNH XÃ HỘI'));
-assert.ok(rows.join('').includes('CÂU KIỀU TRONG ĐỜI SỐNG'));
+assert.ok(rows.join('').includes('Bút pháp'));
+assert.ok(rows.join('').includes('Bối cảnh xã hội'));
+assert.ok(rows.join('').includes('Câu Kiều trong đời sống'));
 console.log('cultural layers validation passed:',anchors.length,'anchors');
