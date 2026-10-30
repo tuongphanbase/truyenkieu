@@ -10,7 +10,7 @@
 
   var root = document.documentElement;
   var KEY = root.getAttribute('data-theme-key') || 'theme';
-  var PAPER = { light: '#ffffff', dark: '#1d1c1a' }; // --paper in css/site.css, for the browser bar
+  var PAPER = { light: '#ffffff', dark: '#1B1D21' }; // --paper in css/site.css, for the browser bar
   var media = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 
   function savedTheme() {
